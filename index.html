@@ -565,6 +565,12 @@
         scroll-behavior: auto !important;
       }
     }
+    .motion-ready body::before,
+    .motion-ready body::after,
+    .motion-ready .entry-card,
+    .motion-ready .entry-card::before {
+      animation: none !important;
+    }
   </style>
 </head>
 <body>
@@ -682,7 +688,7 @@
     }
 
     function canAnimate() {
-      return motion.enabled && !motion.reduce;
+      return false;
     }
 
     function qsa(selector, root = document) {

@@ -888,7 +888,7 @@
       if (!nickname) {
         if (error) {
           error.hidden = false;
-          error.textContent = "请先填写你在群里的名字，再开始答题。";
+          error.textContent = "请先填写群内姓名，再开始答题。";
           if (canAnimate()) {
             gsap.fromTo(error, { autoAlpha: 0, y: -6 }, { autoAlpha: 1, y: 0, duration: .22, ease: "power2.out" });
           }
@@ -1007,8 +1007,8 @@
           <div class="entry-card">
             <div class="tag">PURE ANSWER</div>
             <h1>牛油高考</h1>
-            <p class="hint">这里是牛头人界第一届高考！快来尽情展示你们的牛头人之力吧！！！满分 120 分，80 分及格。填写群里的名字后开始答题，交卷后生成并保存成绩图片。</p>
-            <input id="nickname" class="input" autocomplete="name" placeholder="填写群里的名字 / 群昵称">
+            <p class="hint">这里是牛头人界第一届高考！快来尽情展示你们的牛头人之力吧！！！满分 120 分，80 分及格。填写群内姓名后开始答题，交卷后生成并保存成绩图片。</p>
+            <input id="nickname" class="input" autocomplete="name" placeholder="填写群内姓名 / 群昵称">
             <p id="entry-error" class="field-error" hidden></p>
             <button id="start" class="primary">开始答题</button>
           </div>
@@ -1269,7 +1269,7 @@
           <div class="result-card" id="result-card">
             <div class="tag">RESULT CARD</div>
             <h1>成绩已生成</h1>
-            <p class="hint">页面会自动生成成绩图片。手机端如果没有弹出下载，请长按下方成绩图片保存到相册。</p>
+            <p class="hint">页面会自动生成成绩图片。请把成绩图片发给群主，同时点击“复制成绩文字”，把群内姓名和成绩一起发给群主。</p>
             <div class="seal-lines" style="font-size:18px">
               <div id="score-line" data-score="${record.score}">总分：${record.score}/${record.total}</div>
               <div>评级：${escapeHtml(getRank(record.score))}</div>
@@ -1277,21 +1277,26 @@
               <div>看图题：${record.wScore} 分</div>
             </div>
             <div class="seal-lines">
-              <div>群名：${escapeHtml(record.nickname)}</div>
+              <div>群内姓名：${escapeHtml(record.nickname)}</div>
               <div>答卷编号：${escapeHtml(record.sessionId)}</div>
               <div>交卷时间：${escapeHtml(new Date(record.submittedAt).toLocaleString("zh-CN"))}</div>
               <div>校验码：${escapeHtml(record.checksum)}</div>
             </div>
             <div class="actions">
               <button class="primary" id="save-image">保存成绩图片</button>
+              <button class="secondary" id="copy-result">复制成绩文字</button>
             </div>
-            <div class="save-note" id="save-note">正在生成成绩图片。苹果手机请长按下方成绩图片保存；安卓手机可以点击“保存成绩图片”或长按图片保存。</div>
+            <div class="save-note" id="save-note">正在生成成绩图片。请保存图片，并把复制的成绩文字一起发给群主。</div>
             <img id="result-preview" class="result-preview" alt="成绩图片">
           </div>
         </section>`;
       document.getElementById("save-image").addEventListener("click", (event) => {
         animateButtonPress(event.currentTarget);
         saveResultImage();
+      });
+      document.getElementById("copy-result").addEventListener("click", (event) => {
+        animateButtonPress(event.currentTarget);
+        copyResultText();
       });
       animateResult();
     }
@@ -1360,7 +1365,7 @@
       const lines = [
         "基础题：" + record.qScore + " 分",
         "看图题：" + record.wScore + " 分",
-        "群名：" + record.nickname,
+        "群内姓名：" + record.nickname,
         "答卷编号：" + record.sessionId,
         "交卷时间：" + new Date(record.submittedAt).toLocaleString("zh-CN"),
         "校验码：" + record.checksum
@@ -1378,7 +1383,7 @@
       ctx.stroke();
       ctx.fillStyle = "#e60012";
       ctx.font = "900 28px Arial";
-      ctx.fillText("请保存此成绩图片，并发送给管理员。", 78, canvas.height - 100);
+      ctx.fillText("请保存成绩图片，并把群内姓名和成绩文字一起发给群主。", 78, canvas.height - 100);
       const dataUrl = canvas.toDataURL("image/png");
       state.resultImageUrl = dataUrl;
       return dataUrl;
@@ -1392,7 +1397,7 @@
         preview.src = dataUrl;
         preview.style.display = "block";
       }
-      setSaveNote("成绩图片已生成。苹果手机请长按下方图片保存；安卓/电脑可点“保存成绩图片”下载，也可以长按图片保存。");
+      setSaveNote("成绩图片已生成。请保存图片，并点击“复制成绩文字”，把图片和文字一起发给群主。");
       if (tryDownload) downloadResultImage(dataUrl);
       return dataUrl;
     }
@@ -1411,6 +1416,49 @@
     function saveResultImage() {
       const dataUrl = ensureResultImage(true);
       if (dataUrl) setSaveNote("如果没有自动下载：苹果手机长按下方图片保存；安卓手机可长按图片或再次点击保存。");
+    }
+
+    function buildResultText() {
+      if (!state.record) return "";
+      const record = state.record;
+      return [
+        "牛油高考成绩",
+        "群内姓名：" + record.nickname,
+        "总分：" + record.score + "/" + record.total,
+        "评级：" + getRank(record.score),
+        "基础题：" + record.qScore + " 分",
+        "看图题：" + record.wScore + " 分",
+        "答卷编号：" + record.sessionId,
+        "校验码：" + record.checksum
+      ].join("\n");
+    }
+
+    function fallbackCopyText(text) {
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.left = "-9999px";
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+    }
+
+    async function copyResultText() {
+      const text = buildResultText();
+      if (!text) return;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          fallbackCopyText(text);
+        }
+        setSaveNote("成绩文字已复制。请把成绩图片和这段文字一起发给群主。");
+      } catch {
+        fallbackCopyText(text);
+        setSaveNote("成绩文字已复制。请把成绩图片和这段文字一起发给群主。");
+      }
     }
 
     try {

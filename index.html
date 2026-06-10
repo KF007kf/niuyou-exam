@@ -908,7 +908,7 @@
       state.imageOrder = seededShuffle(DATA.works.map((item) => item.id), state.sessionId + "-images");
       state.targetOrder = createDerangedOrder(DATA.works.map((item) => item.id), state.sessionId + "-targets");
       DATA.questions.forEach((question) => {
-        state.optionOrders[question.id] = seededShuffle(question.options, state.sessionId + "-" + question.id);
+        state.optionOrders[question.id] = question.options.slice();
       });
       state.starting = true;
       leaveEntry(() => {
@@ -1109,6 +1109,12 @@
     function renderMatch() {
       const container = document.getElementById("match");
       if (!container) return;
+      const pageX = window.scrollX;
+      const pageY = window.scrollY;
+      const oldWorkGrid = container.querySelector(".work-grid");
+      const oldAnswerPanel = container.querySelector(".answer-panel");
+      const workScrollTop = oldWorkGrid ? oldWorkGrid.scrollTop : 0;
+      const answerScrollTop = oldAnswerPanel ? oldAnswerPanel.scrollTop : 0;
       const itemMap = Object.fromEntries(DATA.works.map((item) => [item.id, item]));
       const imageItems = (state.imageOrder.length ? state.imageOrder : DATA.works.map((item) => item.id)).map((id) => itemMap[id]).filter(Boolean);
       const targets = (state.targetOrder.length ? state.targetOrder : DATA.works.map((item) => item.id)).map((id) => itemMap[id]).filter(Boolean);
@@ -1163,6 +1169,11 @@
             </div>
           </div>
         </div>`;
+      const newWorkGrid = container.querySelector(".work-grid");
+      const newAnswerPanel = container.querySelector(".answer-panel");
+      if (newWorkGrid) newWorkGrid.scrollTop = workScrollTop;
+      if (newAnswerPanel) newAnswerPanel.scrollTop = answerScrollTop;
+      window.scrollTo(pageX, pageY);
       animateMatchRender(container);
       container.querySelectorAll(".work-card").forEach((button) => {
         button.addEventListener("click", () => {

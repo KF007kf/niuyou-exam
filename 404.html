@@ -480,10 +480,10 @@
       min-height: 100vh;
       padding: 18px 12px;
       display: grid;
-      place-items: center;
+      place-items: start center;
     }
     .result-card {
-      width: min(760px, 100%);
+      width: min(900px, 100%);
       padding: 18px;
       will-change: transform;
     }
@@ -518,6 +518,58 @@
       display: none;
       -webkit-touch-callout: default;
       user-select: auto;
+    }
+    .result-review {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .review-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 9px 10px;
+      border: 2px solid var(--line);
+      background: var(--ink);
+      color: #fff;
+      font-weight: 900;
+    }
+    .review-heading span:last-child { color: var(--red); }
+    .review-list {
+      display: grid;
+      gap: 10px;
+    }
+    .review-row {
+      border: 2px solid var(--line);
+      background: #fff;
+      box-shadow: 3px 3px 0 var(--ink);
+      padding: 10px;
+    }
+    .review-row.correct { box-shadow: 3px 3px 0 #1f7a3a; }
+    .review-row.wrong { box-shadow: 3px 3px 0 var(--red); }
+    .review-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+    }
+    .review-top strong { color: var(--red); }
+    .review-row.correct .review-top strong { color: #1f7a3a; }
+    .review-question {
+      margin-top: 8px;
+      font-weight: 900;
+      line-height: 1.45;
+    }
+    .review-answer {
+      margin-top: 6px;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
     }
     .motion-wipe {
       position: fixed;
@@ -826,15 +878,12 @@
     }
 
     function animateResult() {
-      if (!canAnimate()) {
-        ensureResultImage(false);
-        return;
-      }
+      if (!canAnimate()) return;
       const card = document.querySelector(".result-card");
       const scoreLine = document.getElementById("score-line");
       const scoreValue = scoreLine ? Number(scoreLine.dataset.score || 0) : 0;
       if (scoreLine) scoreLine.textContent = "总分：0/" + (state.record ? state.record.total : DATA.totalScore);
-      gsap.timeline({ onComplete: () => ensureResultImage(false), defaults: { ease: "power3.out" } })
+      gsap.timeline({ defaults: { ease: "power3.out" } })
         .from(card, { autoAlpha: 0, y: 34, scale: .965, duration: .58 })
         .from(qsa(".result-card .tag, .result-card h1, .result-card .hint"), { autoAlpha: 0, y: 18, stagger: .06, duration: .34 }, "-=.28")
         .from(".seal-lines > div", { autoAlpha: 0, x: -16, stagger: .045, duration: .32 }, "-=.12")
@@ -846,7 +895,7 @@
             if (scoreLine && state.record) scoreLine.textContent = "总分：" + Math.round(this.targets()[0].value) + "/" + state.record.total;
           }
         }, "-=.45")
-        .from(".actions .primary, .save-note", { autoAlpha: 0, y: 14, stagger: .06, duration: .32 }, "-=.2");
+        .from(".actions .primary, .actions .secondary, .review-row", { autoAlpha: 0, y: 14, stagger: .025, duration: .28 }, "-=.2");
     }
 
     function sameAnswer(user, answer) {
@@ -888,7 +937,7 @@
       if (!nickname) {
         if (error) {
           error.hidden = false;
-          error.textContent = "请先填写群内姓名，再开始答题。";
+          error.textContent = "请先填写名字，再开始答题。";
           if (canAnimate()) {
             gsap.fromTo(error, { autoAlpha: 0, y: -6 }, { autoAlpha: 1, y: 0, duration: .22, ease: "power2.out" });
           }
@@ -904,7 +953,7 @@
       state.started = true;
       state.startedAt = Date.now();
       state.sessionId = "NX-" + hashString(Date.now() + "-" + Math.random() + "-" + nickname).toString(36).toUpperCase();
-      state.timeLeft = DATA.timeLimitMinutes * 60;
+      state.timeLeft = 0;
       state.imageOrder = seededShuffle(DATA.works.map((item) => item.id), state.sessionId + "-images");
       state.targetOrder = createDerangedOrder(DATA.works.map((item) => item.id), state.sessionId + "-targets");
       DATA.questions.forEach((question) => {
@@ -913,7 +962,6 @@
       state.starting = true;
       leaveEntry(() => {
         renderExam();
-        state.timer = window.setInterval(tick, 1000);
         state.starting = false;
         window.scrollTo({ top: 0, behavior: canAnimate() ? "smooth" : "auto" });
       });
@@ -988,6 +1036,8 @@
         qScore,
         wScore,
         submittedAt: compact.at,
+        answers: { ...state.answers },
+        placements: { ...state.placements },
         checksum: hashString(JSON.stringify(compact)).toString(16).toUpperCase().padStart(8, "0")
       };
     }
@@ -997,7 +1047,7 @@
       if (state.timer) window.clearInterval(state.timer);
       state.submitted = true;
       state.record = buildPayload(timedOut);
-      try { localStorage.setItem(ATTEMPT_KEY, JSON.stringify(state.record)); } catch {}
+      try { localStorage.removeItem(ATTEMPT_KEY); } catch {}
       renderResult();
     }
 
@@ -1007,8 +1057,8 @@
           <div class="entry-card">
             <div class="tag">PURE ANSWER</div>
             <h1>牛油高考</h1>
-            <p class="hint">这里是牛头人界第一届高考！快来尽情展示你们的牛头人之力吧！！！满分 120 分，60 分及格。填写群内姓名后开始答题，交卷后生成并保存成绩图片。</p>
-            <input id="nickname" class="input" autocomplete="name" placeholder="填写群内姓名 / 群昵称">
+            <p class="hint">牛油高考已结束，试题现已放出。填写名字后可以随心答题；不限时、不限次数，交卷后可以查看分数、等级、自己的答案和正确答案。</p>
+            <input id="nickname" class="input" autocomplete="name" placeholder="填写名字">
             <p id="entry-error" class="field-error" hidden></p>
             <button id="start" class="primary">开始答题</button>
           </div>
@@ -1038,7 +1088,7 @@
         </section>
         <section id="questions"></section>
         <section id="match"></section>
-        <section class="submit-wrap"><button class="primary" id="submit">交卷并生成成绩图片</button></section>
+        <section class="submit-wrap"><button class="primary" id="submit">交卷并查看成绩</button></section>
       `;
       renderQuestions();
       renderMatch();
@@ -1244,7 +1294,7 @@
       if (!qEl) return;
       qEl.textContent = "已答题：" + q + "/" + DATA.questions.length;
       document.getElementById("stat-w").textContent = "图片题：" + w + "/" + DATA.works.length;
-      document.getElementById("stat-time").textContent = "剩余：" + formatTime(state.timeLeft);
+      document.getElementById("stat-time").textContent = "时间：不限";
       document.getElementById("stat-progress").textContent = "进度：" + progress + "%";
       const bar = document.getElementById("bar");
       if (canAnimate()) {
@@ -1262,14 +1312,94 @@
       return "纯苦主 / 丢到牛油里就会被牛的存在";
     }
 
+    function formatAnswer(value) {
+      if (Array.isArray(value)) return value.length ? value.join("、") : "未作答";
+      return value ? String(value) : "未作答";
+    }
+
+    function renderQuestionReview() {
+      const answers = state.record?.answers || state.answers;
+      return `
+        <div class="review-heading"><span>基础题对照</span><span>${scoreQuestions()}/100 分</span></div>
+        <div class="review-list">
+          ${DATA.questions.map((question, index) => {
+            const userAnswer = answers[question.id];
+            const correct = sameAnswer(userAnswer, question.answer);
+            const got = correct ? Number(question.score) : 0;
+            return `
+              <article class="review-row ${correct ? "correct" : "wrong"}">
+                <div class="review-top">
+                  <span>${String(index + 1).padStart(2, "0")} / ${escapeHtml(question.section)} / ${question.score}分</span>
+                  <strong>${correct ? "答对 +" + got : "答错 +0"}</strong>
+                </div>
+                <div class="review-question">${escapeHtml(question.title)}</div>
+                <div class="review-answer">你的答案：${escapeHtml(formatAnswer(userAnswer))}</div>
+                <div class="review-answer">正确答案：${escapeHtml(formatAnswer(question.answer))}</div>
+              </article>`;
+          }).join("")}
+        </div>`;
+    }
+
+    function renderWorkReview() {
+      const placements = state.record?.placements || state.placements;
+      const itemMap = Object.fromEntries(DATA.works.map((item) => [item.id, item]));
+      const targets = (state.targetOrder.length ? state.targetOrder : DATA.works.map((item) => item.id)).map((id) => itemMap[id]).filter(Boolean);
+      return `
+        <div class="review-heading"><span>看图识作品对照</span><span>${scoreWorks()}/${DATA.workScore} 分</span></div>
+        <div class="review-list">
+          ${targets.map((target, index) => {
+            const placedId = Object.entries(placements).find(([, targetId]) => targetId === target.id)?.[0];
+            const placed = placedId ? itemMap[placedId] : null;
+            const correct = placedId === target.id;
+            return `
+              <article class="review-row ${correct ? "correct" : "wrong"}">
+                <div class="review-top">
+                  <span>图片题 ${String(index + 1).padStart(2, "0")} / 1分</span>
+                  <strong>${correct ? "答对 +1" : "答错 +0"}</strong>
+                </div>
+                <div class="review-question">${escapeHtml(target.label)}</div>
+                <div class="review-answer">你的放置：${escapeHtml(placed ? placed.label : "未作答")}</div>
+                <div class="review-answer">正确答案：${escapeHtml(target.label)}</div>
+              </article>`;
+          }).join("")}
+        </div>`;
+    }
+
+    function renderResultReview() {
+      return `<div class="result-review">${renderQuestionReview()}${renderWorkReview()}</div>`;
+    }
+
+    function restartExam() {
+      if (state.timer) window.clearInterval(state.timer);
+      state.started = false;
+      state.submitted = false;
+      state.nickname = "";
+      state.sessionId = "";
+      state.startedAt = 0;
+      state.timeLeft = 0;
+      state.answers = {};
+      state.placements = {};
+      state.selectedWorkId = "";
+      state.imageOrder = [];
+      state.targetOrder = [];
+      state.optionOrders = {};
+      state.resultImageUrl = "";
+      state.matchAnimated = false;
+      state.starting = false;
+      state.record = null;
+      try { localStorage.removeItem(ATTEMPT_KEY); } catch {}
+      renderEntry();
+      window.scrollTo({ top: 0, behavior: canAnimate() ? "smooth" : "auto" });
+    }
+
     function renderResult() {
       const record = state.record;
       app.innerHTML = `
         <section class="result-screen">
           <div class="result-card" id="result-card">
             <div class="tag">RESULT CARD</div>
-            <h1>成绩已生成</h1>
-            <p class="hint">页面会自动生成成绩图片。请把成绩图片发给群主，同时点击“复制成绩文字”，把群内姓名和成绩一起发给群主。</p>
+            <h1>成绩结果</h1>
+            <p class="hint">开放练习结果只展示给你自己看。下面可以查看总分、等级，以及每一道题的作答对照。</p>
             <div class="seal-lines" style="font-size:18px">
               <div id="score-line" data-score="${record.score}">总分：${record.score}/${record.total}</div>
               <div>评级：${escapeHtml(getRank(record.score))}</div>
@@ -1277,26 +1407,20 @@
               <div>看图题：${record.wScore} 分</div>
             </div>
             <div class="seal-lines">
-              <div>群内姓名：${escapeHtml(record.nickname)}</div>
+              <div>名字：${escapeHtml(record.nickname)}</div>
               <div>答卷编号：${escapeHtml(record.sessionId)}</div>
               <div>交卷时间：${escapeHtml(new Date(record.submittedAt).toLocaleString("zh-CN"))}</div>
               <div>校验码：${escapeHtml(record.checksum)}</div>
             </div>
             <div class="actions">
-              <button class="primary" id="save-image">保存成绩图片</button>
-              <button class="secondary" id="copy-result">复制成绩文字</button>
+              <button class="secondary" id="restart">重新答一次</button>
             </div>
-            <div class="save-note" id="save-note">正在生成成绩图片。请保存图片，并把复制的成绩文字一起发给群主。</div>
-            <img id="result-preview" class="result-preview" alt="成绩图片">
+            ${renderResultReview()}
           </div>
         </section>`;
-      document.getElementById("save-image").addEventListener("click", (event) => {
+      document.getElementById("restart").addEventListener("click", (event) => {
         animateButtonPress(event.currentTarget);
-        saveResultImage();
-      });
-      document.getElementById("copy-result").addEventListener("click", (event) => {
-        animateButtonPress(event.currentTarget);
-        copyResultText();
+        restartExam();
       });
       animateResult();
     }
@@ -1365,7 +1489,7 @@
       const lines = [
         "基础题：" + record.qScore + " 分",
         "看图题：" + record.wScore + " 分",
-        "群内姓名：" + record.nickname,
+        "名字：" + record.nickname,
         "答卷编号：" + record.sessionId,
         "交卷时间：" + new Date(record.submittedAt).toLocaleString("zh-CN"),
         "校验码：" + record.checksum
@@ -1383,7 +1507,7 @@
       ctx.stroke();
       ctx.fillStyle = "#e60012";
       ctx.font = "900 28px Arial";
-      ctx.fillText("请保存成绩图片，并把群内姓名和成绩文字一起发给群主。", 78, canvas.height - 100);
+      ctx.fillText("开放练习成绩，仅供自己查看。", 78, canvas.height - 100);
       const dataUrl = canvas.toDataURL("image/png");
       state.resultImageUrl = dataUrl;
       return dataUrl;
@@ -1397,7 +1521,7 @@
         preview.src = dataUrl;
         preview.style.display = "block";
       }
-      setSaveNote("成绩图片已生成。请保存图片，并点击“复制成绩文字”，把图片和文字一起发给群主。");
+      setSaveNote("成绩图片已生成。");
       if (tryDownload) downloadResultImage(dataUrl);
       return dataUrl;
     }
@@ -1423,7 +1547,7 @@
       const record = state.record;
       return [
         "牛油高考成绩",
-        "群内姓名：" + record.nickname,
+        "名字：" + record.nickname,
         "总分：" + record.score + "/" + record.total,
         "评级：" + getRank(record.score),
         "基础题：" + record.qScore + " 分",
@@ -1454,10 +1578,10 @@
         } else {
           fallbackCopyText(text);
         }
-        setSaveNote("成绩文字已复制。请把成绩图片和这段文字一起发给群主。");
+        setSaveNote("成绩文字已复制。");
       } catch {
         fallbackCopyText(text);
-        setSaveNote("成绩文字已复制。请把成绩图片和这段文字一起发给群主。");
+        setSaveNote("成绩文字已复制。");
       }
     }
 
@@ -1467,14 +1591,8 @@
         localStorage.removeItem(ATTEMPT_KEY);
         window.history.replaceState(null, "", window.location.pathname);
       }
-      const locked = localStorage.getItem(ATTEMPT_KEY);
-      if (locked) {
-        state.record = JSON.parse(locked);
-        state.submitted = true;
-        renderResult();
-      } else {
-        renderEntry();
-      }
+      localStorage.removeItem(ATTEMPT_KEY);
+      renderEntry();
     } catch {
       renderEntry();
     }

@@ -103,7 +103,7 @@
       position: absolute;
       right: max(12px, 4vw);
       top: max(18px, 5vh);
-      content: "PUBLIC ARCHIVE";
+      content: "SOULPOP TEST";
       padding: 6px 10px;
       border: 2px solid var(--line);
       background: var(--red);
@@ -129,7 +129,7 @@
       position: absolute;
       right: -46px;
       top: 26px;
-      content: "NTR POWER RELEASED";
+      content: "NTR POWER SYSTEM";
       padding: 7px 54px;
       border: 2px solid var(--line);
       background: var(--ink);
@@ -181,10 +181,11 @@
     }
     .entry-title .title-main {
       font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
-      font-size: clamp(58px, 13vw, 118px);
+      font-size: clamp(44px, 8.2vw, 86px);
       font-weight: 900;
       line-height: .86;
-      letter-spacing: -.06em;
+      letter-spacing: -.07em;
+      white-space: nowrap;
     }
     .entry-title .title-sub {
       display: inline-block;
@@ -231,7 +232,7 @@
     }
     .rank-chip {
       display: grid;
-      grid-template-columns: 42px 1fr;
+      grid-template-columns: 50px 1fr;
       align-items: center;
       min-height: 42px;
       border: 2px solid var(--line);
@@ -240,15 +241,14 @@
       font-weight: 900;
       overflow: hidden;
     }
-    .rank-chip b {
+    .rank-mini {
       display: grid;
       place-items: center;
       height: 100%;
       background: var(--ink);
       color: #fff;
-      font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
-      font-size: 22px;
     }
+    .rank-mini .rank-icon { width: 38px; height: 38px; }
     .rank-chip span {
       padding: 6px 9px;
       font-size: 12px;
@@ -684,13 +684,11 @@
       place-items: center;
       min-height: 118px;
       border: 3px solid var(--line);
-      background: var(--ink);
-      color: #fff;
+      background:
+        linear-gradient(135deg, rgba(230,0,18,.14), transparent 48%),
+        #fff;
+      color: var(--ink);
       box-shadow: 4px 4px 0 var(--red);
-      font-family: Georgia, "Times New Roman", "Noto Serif SC", serif;
-      font-size: 58px;
-      font-weight: 900;
-      line-height: 1;
     }
     .rank-emblem::before,
     .rank-emblem::after {
@@ -710,6 +708,37 @@
       right: 18px;
       transform: skewX(18deg) rotate(10deg);
     }
+    .rank-icon {
+      width: 104px;
+      height: 104px;
+      display: block;
+      overflow: visible;
+    }
+    .rank-icon .horn,
+    .rank-icon .snout,
+    .rank-icon .accent {
+      stroke: var(--line);
+      stroke-width: 5;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+    .rank-icon .horn { fill: #fff; }
+    .rank-icon .head { fill: var(--ink); stroke: var(--line); stroke-width: 5; stroke-linejoin: round; }
+    .rank-icon .snout { fill: var(--paper); }
+    .rank-icon .eye { fill: #fff; }
+    .rank-icon .nostril { fill: var(--ink); }
+    .rank-icon .accent { fill: var(--red); }
+    .rank-icon .accent-line {
+      fill: none;
+      stroke: var(--red);
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .rank-icon-mini .horn,
+    .rank-icon-mini .snout,
+    .rank-icon-mini .accent { stroke-width: 7; }
+    .rank-icon-mini .head { stroke-width: 7; }
     .rank-info {
       position: relative;
       z-index: 1;
@@ -841,7 +870,7 @@
       .entry-grid { grid-template-columns: 1fr; }
       .entry-form { grid-template-columns: 1fr; }
       .entry .primary { width: 100%; }
-      .entry-title .title-main { font-size: clamp(54px, 19vw, 82px); }
+      .entry-title .title-main { font-size: clamp(38px, 12.4vw, 58px); }
       .entry-title .title-sub { transform: skewX(-8deg); }
       .rank-showcase { grid-template-columns: 1fr; }
       .rank-emblem { min-height: 96px; }
@@ -1305,30 +1334,30 @@
         <section class="entry">
           <div class="entry-card">
             <div class="entry-kicker">
-              <div class="tag">NTR POWER ARCHIVE</div>
-              <div class="entry-status">试题放出 / OPEN PRACTICE</div>
+              <div class="tag">SOULPOP // NTR POWER</div>
+              <div class="entry-status">第一届牛油高考 / OFFICIAL TEST</div>
             </div>
             <div class="entry-title">
-              <div class="title-main">牛油高考</div>
-              <div class="title-sub">试题解封</div>
+              <div class="title-main">第一届牛油高考</div>
+              <div class="title-sub">“牛头人之力”统测</div>
             </div>
-            <p class="hint">牛油高考已结束，试题现已放出。填写名字后可以随心答题；不限时、不限次数，交卷后可以查看分数、等级、自己的答案和正确答案。</p>
+            <p class="hint">这是面向全体牛油玩家的牛头人之力测试。填写名字即可进入考场，交卷后查看分数、等级、自己的答案与完整答案对照。</p>
             <div class="entry-grid">
               <div class="entry-panel">
-                <strong>EXAM RELEASE NOTE</strong>
+                <strong>EXAM NOTICE</strong>
                 <ul>
                   <li>满分 120 分，60 分及格。</li>
-                  <li>基础题 100 分，看图识作品 20 分。</li>
-                  <li>交卷后公开你的作答对照，不再隐藏答案。</li>
+                  <li>题型包含单选、多选、判断、看图识作品。</li>
+                  <li>主题：SOULPOP × NTR POWER。</li>
                 </ul>
               </div>
               <div class="entry-panel rank-strip">
                 <strong>NTR RANK MARKS</strong>
-                <div class="rank-chip"><b>苦</b><span>0-49 纯苦主 / BROKEN ROUTE</span></div>
-                <div class="rank-chip"><b>女</b><span>50-69 女主 / HEROINE ROUTE</span></div>
-                <div class="rank-chip"><b>民</b><span>70-89 牛头人公民 / NTR PASSPORT</span></div>
-                <div class="rank-chip"><b>战</b><span>90-109 牛头人战士 / HORN SOLDIER</span></div>
-                <div class="rank-chip"><b>王</b><span>110-120 牛魔王 / OVERLORD MARK</span></div>
+                <div class="rank-chip"><i class="rank-mini">${rankIconSvg("victim", true)}</i><span>0-49 纯苦主 / BROKEN ROUTE</span></div>
+                <div class="rank-chip"><i class="rank-mini">${rankIconSvg("heroine", true)}</i><span>50-69 女主 / HEROINE ROUTE</span></div>
+                <div class="rank-chip"><i class="rank-mini">${rankIconSvg("citizen", true)}</i><span>70-89 牛头人公民 / NTR PASSPORT</span></div>
+                <div class="rank-chip"><i class="rank-mini">${rankIconSvg("warrior", true)}</i><span>90-109 牛头人战士 / HORN SOLDIER</span></div>
+                <div class="rank-chip"><i class="rank-mini">${rankIconSvg("king", true)}</i><span>110-120 牛魔王 / OVERLORD MARK</span></div>
               </div>
             </div>
             <div class="entry-form">
@@ -1600,6 +1629,38 @@
       return rank.label + " / " + rank.desc;
     }
 
+    function rankIconSvg(rankOrKey, mini = false) {
+      const key = typeof rankOrKey === "string" ? rankOrKey : rankOrKey.key;
+      const extras = {
+        victim: `
+          <path class="accent-line" d="M61 18 L52 35 L64 46 L55 66" />
+          <path class="accent" d="M42 84 L55 98 L68 84 L60 77 L55 82 L50 77 Z" />`,
+        heroine: `
+          <path class="accent" d="M60 93 C45 82 37 73 39 63 C41 54 52 53 60 63 C68 53 79 54 81 63 C83 73 75 82 60 93 Z" />`,
+        citizen: `
+          <path class="accent" d="M42 82 H78 V101 H42 Z" />
+          <path class="accent-line" d="M49 90 H71" />`,
+        warrior: `
+          <path class="accent-line" d="M36 96 L84 58" />
+          <path class="accent-line" d="M84 96 L36 58" />`,
+        king: `
+          <path class="accent" d="M36 30 L48 16 L60 31 L72 16 L84 30 L78 45 H42 Z" />
+          <path class="accent-line" d="M46 39 H74" />`
+      };
+      return `
+        <svg class="rank-icon ${mini ? "rank-icon-mini" : ""} rank-icon-${key}" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+          <path class="horn" d="M39 39 C20 24 12 17 7 20 C4 22 6 33 17 45 C25 54 33 58 39 58 Z" />
+          <path class="horn" d="M81 39 C100 24 108 17 113 20 C116 22 114 33 103 45 C95 54 87 58 81 58 Z" />
+          <path class="head" d="M33 43 C39 31 50 27 60 27 C70 27 81 31 87 43 C94 57 90 82 77 95 C70 102 50 102 43 95 C30 82 26 57 33 43 Z" />
+          <circle class="eye" cx="49" cy="57" r="5" />
+          <circle class="eye" cx="71" cy="57" r="5" />
+          <path class="snout" d="M45 76 C48 66 72 66 75 76 C78 90 42 90 45 76 Z" />
+          <circle class="nostril" cx="54" cy="79" r="3" />
+          <circle class="nostril" cx="66" cy="79" r="3" />
+          ${extras[key] || extras.citizen}
+        </svg>`;
+    }
+
     function formatAnswer(value) {
       if (Array.isArray(value)) return value.length ? value.join("、") : "未作答";
       return value ? String(value) : "未作答";
@@ -1688,9 +1749,9 @@
           <div class="result-card" id="result-card">
             <div class="tag">RESULT CARD</div>
             <h1>成绩结果</h1>
-            <p class="hint">开放练习结果只展示给你自己看。下面可以查看总分、等级，以及每一道题的作答对照。</p>
+            <p class="hint">本次牛头人之力判定如下。下面可以查看总分、等级，以及每一道题的作答对照。</p>
             <div class="rank-showcase rank-${rank.key}">
-              <div class="rank-emblem">${escapeHtml(rank.mark)}</div>
+              <div class="rank-emblem">${rankIconSvg(rank)}</div>
               <div class="rank-info">
                 <div class="rank-code">${escapeHtml(rank.code)}</div>
                 <h2>${escapeHtml(rank.label)}</h2>
